@@ -1,0 +1,12 @@
+opam-version: "2.0"
+name: "gkoeditor"
+version: "0.1"
+synopsis: "Text editor in ocaml"
+maintainer: "Daniel Hilst Selli <danielhilst at gmail.com>"
+authors: "Daniel Hilst Selli <danielhilst at gmail.com>"
+license: "MIT"
+depends: [ "ocaml" "ocamlfind" "curses" "core" ]
+build: [
+  [make]
+]
+install: [make "install"]
