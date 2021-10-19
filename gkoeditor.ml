@@ -17,10 +17,53 @@ type options = {
   input_file : string;
 }
 
+module Buffer : sig
+  type t
 
-module Buffer = struct
-  type t = private string
+  val make : unit -> t
+  val write_char : t -> char -> t
+  val read_char : t -> char
+  val seek : t -> int -> t
+  val contents : t -> string
+end = struct
+  type t = {
+    buffer : Buffer.t;
+    mutable pos : int;
+    mutable line : int;
+    mutable column : int;
+  }
 
+  let buffer_size = 4096
+
+  let make () =  {
+    buffer = Buffer.create buffer_size;
+    pos = 0;
+    line = 1;
+    column = 1;
+  }
+
+  let foo =
+    if '\n' = '\n' then
+      prit_endline "foo"
+
+  let write_char t ch =
+    Buffer.add_char t.buffer ch;
+    t.pos <- t.pos + 1;
+    if Char.to_string ch = "\n" then begin
+      t.line <- t.line + 1;
+      t.column <- 1;
+    end;
+    t
+
+  let read_char t = Buffer.nth t.buffer t.pos
+
+  let seek t pos =
+    let pos = min pos 0 in
+    if pos < Buffer.length t.buffer then
+      t.pos <- pos;
+    t
+
+  let contents t = Buffer.contents t.buffer
 end
 
 
