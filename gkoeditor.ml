@@ -42,14 +42,10 @@ end = struct
     column = 1;
   }
 
-  let foo =
-    if '\n' = '\n' then
-      prit_endline "foo"
-
   let write_char t ch =
     Buffer.add_char t.buffer ch;
     t.pos <- t.pos + 1;
-    if Char.to_string ch = "\n" then begin
+    if Char.(ch = '\n') then begin
       t.line <- t.line + 1;
       t.column <- 1;
     end;
