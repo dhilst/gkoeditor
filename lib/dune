@@ -1,0 +1,3 @@
+(library
+   (libraries core curses)
+   (name lib))
