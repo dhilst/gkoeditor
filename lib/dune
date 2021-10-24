@@ -1,3 +1,4 @@
 (library
    (libraries core curses)
-   (name lib))
+   (name lib)
+   (preprocess (pps ppx_sexp_conv)))
