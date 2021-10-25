@@ -252,14 +252,17 @@ let main () =
   let mainwin = initscr () in
   cbreak () |> raise_err;
   noecho () |> raise_err;
-  keypad mainwin true |> raise_err;
+  start_color () |> raise_err;
+  use_default_colors () |> raise_err;
+  let (maxy, maxx) = getmaxyx mainwin in
 
-  let subwin1 = derwin mainwin 3 100 0 0 in
-  let subwin2 = derwin mainwin 10 100 3 0 in
+  let subwin1 = derwin mainwin (maxy - 2) maxx 0 0 in
+  let subwin2 = derwin mainwin 2 maxx (maxy - 2) 0 in
   let acs = get_acs_codes () in
   box subwin1 acs.vline acs.hline;
   box subwin2 acs.vline acs.hline;
 
+  init_pair 1 3 (-1)  |> raise_err;
   wmove subwin1 1 1 |> raise_err;
 
   refresh () |> raise_err;
@@ -268,7 +271,9 @@ let main () =
   waddstr subwin2 (Printf.sprintf "%d %d" y x) |> raise_err;
   while true do
     let ch = wgetch subwin1 in
+    wattron subwin1 @@ A.color_pair 1;
     waddch subwin1 ch |> raise_err;
+    wattroff subwin1 @@ A.color_pair 1;
     waddch subwin2 ch |> raise_err;
     refresh () |> raise_err ;
   done
