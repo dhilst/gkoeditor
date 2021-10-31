@@ -254,26 +254,68 @@ let main () =
   noecho () |> raise_err;
   start_color () |> raise_err;
   use_default_colors () |> raise_err;
+  (* curs_set 0 |> raise_err; *)
   let (maxy, maxx) = getmaxyx mainwin in
 
-  let subwin1 = derwin mainwin (maxy - 2) maxx 0 0 in
-  let subwin2 = derwin mainwin 2 maxx (maxy - 2) 0 in
+  let w2h = 3 in
+  let subwin1 = derwin mainwin (maxy - w2h) maxx 0 0 in
+  let subwin2 = derwin mainwin w2h maxx (maxy - w2h) 0 in
   let acs = get_acs_codes () in
   box subwin1 acs.vline acs.hline;
   box subwin2 acs.vline acs.hline;
 
-  init_pair 1 3 (-1)  |> raise_err;
+  init_pair 1 2 (-1)  |> raise_err;
+
+  scrollok subwin1 true;
+  keypad subwin1 true |> raise_err;
+  (* idlok subwin1 true; *)
   wmove subwin1 1 1 |> raise_err;
+  wmove subwin2 1 1 |> raise_err;
 
   refresh () |> raise_err;
 
-  let (y, x) =  getmaxyx mainwin in
-  waddstr subwin2 (Printf.sprintf "%d %d" y x) |> raise_err;
+  waddstr subwin2 (Printf.sprintf "%d %d" maxy maxx) |> raise_err;
   while true do
     let ch = wgetch subwin1 in
-    wattron subwin1 @@ A.color_pair 1;
-    waddch subwin1 ch |> raise_err;
-    wattroff subwin1 @@ A.color_pair 1;
-    waddch subwin2 ch |> raise_err;
-    refresh () |> raise_err ;
+    wclrtoeol subwin2;
+    wmove subwin2 1 1 |> raise_err;
+    waddstr subwin2 (Printf.sprintf "%d" ch) |> raise_err;
+    (* box subwin2 acs.vline acs.hline; *)
+    wrefresh subwin2 |> raise_err;
+    let (y, x) = getyx subwin1 in
+    let moveup () =
+      wmove subwin1 (y - 1) x |> raise_err;
+      let str = ref (String.make 1024 ' ') in
+      winstr subwin1 !str |> raise_err;
+      let lstr = String.to_list !str in
+      let len = 10 in
+      wmove subwin1 (y - 1) len |> raise_err in
+    let moveback () =
+      wmove subwin1 y (x - 1) |> raise_err in
+    let delchr () = wdelch subwin1 |> raise_err in
+    match ch with
+    | 127 ->
+      begin
+        match (y, x) with
+        | 1, 1 -> ()
+        | _, 1 -> (* first column *) begin
+            moveup ();
+            delchr ()
+          end
+        | _, _ -> begin
+            moveback ();
+            delchr ()
+          end;
+      end
+    | _ ->
+      begin
+        wattron subwin1 @@ A.color_pair 1;
+        waddch subwin1 ch |> raise_err;
+        wattroff subwin1 @@ A.color_pair 1;
+
+        let (y, x) = getyx subwin1 in
+        if x = 0 then wmove subwin1 y 1 |> raise_err;
+      end;
+      box subwin1 acs.vline acs.hline;
+      wrefresh subwin1 |> raise_err;
   done
