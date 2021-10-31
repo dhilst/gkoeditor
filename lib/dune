@@ -1,4 +1,5 @@
 (library
    (libraries core curses)
    (name lib)
-   (preprocess (pps ppx_sexp_conv)))
+   (inline_tests)
+   (preprocess (pps ppx_sexp_conv ppx_inline_test)))

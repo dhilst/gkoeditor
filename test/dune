@@ -1,0 +1,5 @@
+(tests
+  (names editortest)
+  (libraries alcotest lib)
+  (package gkoeditor)
+  )
